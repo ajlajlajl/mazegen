@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "incremental": true,
+    "target": "ES2022",
+    "module": "ES2022",
+    "outDir": "build",
+    "rootDir": "src",
+    "tsBuildInfoFile": "./build/build-inc.inf",
+    "removeComments": false,
+    "strict": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+
+    "resolveJsonModule": true
+  }
+}

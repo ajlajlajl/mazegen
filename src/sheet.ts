@@ -1,4 +1,5 @@
-import {Point, Cell, CellStates} from "./Cell.js"
+import {Cell, CellStates, Point} from "./Cell.js"
+import {categorize} from "./Graph.js"
 
 type CheckCellCB = (point: Point) => boolean
 
@@ -50,6 +51,8 @@ export abstract class SheetBase {
     abstract isCorridor(cell: Cell): boolean
 
     abstract validate(): boolean
+
+    
 }
 
 export class RectangleSheet extends SheetBase {
@@ -82,7 +85,10 @@ export class RectangleSheet extends SheetBase {
 
     resetCells() {
         this.cells = (new Array(this.w * this.h)).fill(1).map((v, i) => {
-            return new Cell(this, this.index2Point(i))
+            let c = new Cell(this, this.index2Point(i))
+            if (this.isBlockedCB !== undefined && this.isBlockedCB(c.point))
+                c.state = CellStates.blocked
+            return c
         })
     }
 
@@ -106,23 +112,10 @@ export class RectangleSheet extends SheetBase {
         return {x: p.x + mvp.x, y: p.y + mvp.y}
     }
 
-    validate() {
-        let notFin = !this.isAllCellsState(CellStates.fin)
-        let allWall = this.cells.some(c => c.hasAllWalls())
-
-        /*this.setAllCellData('vldIC', 0)
-        let cnnQ: Cell[] = [this.cells[0]]
-        while (cnnQ.length > 0) {
-            let c = cnnQ.pop() as Cell
-            c.data.vldIC = 1
-            c.listLinks().forEach(d => {
-                let n = c.getNeighbor(d)
-                if (n.data.vldIC != 1) {
-                    cnnQ.push(n)
-                }
-            })
-        }*/
-        //let notInterconnected = !this.isAllCellsData('vldIC', 1)
-        return notFin || allWall //|| notInterconnected todo:implement
+    validate(): boolean {
+        let notFin: boolean = !this.isAllCellsState(CellStates.fin)
+        let allWall: boolean = this.cells.some(c => c.hasAllWalls())
+        let notInterconnected: boolean = categorize(this) !== 1
+        return notFin || allWall || notInterconnected
     }
 }

@@ -1,4 +1,4 @@
-import {SheetBase} from "./sheet";
+import {SheetBase} from "./sheet.js"
 
 export interface Point {
     x: number

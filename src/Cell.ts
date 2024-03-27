@@ -67,4 +67,20 @@ export class Cell {
     listValidNeighbors(): Cell[] {
         return this.listValidDirs().map(d => this.getNeighbor(d))
     }
+
+    _addLink(dir: number) {
+        if (!this.links.includes(dir)) {
+            this.links.push(dir)
+        }
+    }
+
+    _removeLink(dir: number) {
+        let i = this.links.indexOf(dir)
+        if (i !== -1)
+            this.links.splice(i, 1)
+    }
+
+    linkTo(dir: number) {
+        this.sheet.linkCellsCD(this, dir)
+    }
 }

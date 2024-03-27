@@ -52,7 +52,59 @@ export abstract class SheetBase {
 
     abstract validate(): boolean
 
-    
+    abstract getCellDirection(pRef: Point, pn: Point): number
+
+    abstract getDirectionFromNeighborPerspective(pRef: Point, dir: number): number
+
+    linkCellsPD(p: Point, dir: number) {
+        let c = this.getCell(p)
+        this.linkCellsCD(c, dir)
+    }
+
+    linkCellsPP(p1: Point, p2: Point) {
+        let c1 = this.getCell(p1)
+        let c2 = this.getCell(p2)
+        this.linkCellsCC(c1, c2)
+    }
+
+    linkCellsCD(c: Cell, dir: number) {
+        c._addLink(dir)
+        let cn = c.getNeighbor(dir)
+        let ndir = this.getDirectionFromNeighborPerspective(c.point, dir)
+        cn._addLink(ndir)
+    }
+
+    linkCellsCC(c1: Cell, c2: Cell) {
+        let dir = this.getCellDirection(c1.point, c2.point)
+        c1._addLink(dir)
+        let ndir = this.getDirectionFromNeighborPerspective(c1.point, dir)
+        c2._addLink(ndir)
+    }
+
+    unlinkCellsPD(p: Point, dir: number) {
+        let c = this.getCell(p)
+        this.unlinkCellsCD(c, dir)
+    }
+
+    unlinkCellsPP(p1: Point, p2: Point) {
+        let c1 = this.getCell(p1)
+        let c2 = this.getCell(p2)
+        this.unlinkCellsCC(c1, c2)
+    }
+
+    unlinkCellsCD(c: Cell, dir: number) {
+        c._removeLink(dir)
+        let cn = c.getNeighbor(dir)
+        let ndir = this.getDirectionFromNeighborPerspective(c.point, dir)
+        cn._removeLink(ndir)
+    }
+
+    unlinkCellsCC(c1: Cell, c2: Cell) {
+        let dir = this.getCellDirection(c1.point, c2.point)
+        c1._removeLink(dir)
+        let ndir = this.getDirectionFromNeighborPerspective(c1.point, dir)
+        c2._removeLink(ndir)
+    }
 }
 
 export class RectangleSheet extends SheetBase {
@@ -117,5 +169,16 @@ export class RectangleSheet extends SheetBase {
         let allWall: boolean = this.cells.some(c => c.hasAllWalls())
         let notInterconnected: boolean = categorize(this) !== 1
         return notFin || allWall || notInterconnected
+    }
+
+    getCellDirection(pRef: Point, pn: Point): number {
+        let distance = Math.abs(pRef.x - pn.x) + Math.abs(pRef.y - pn.y)
+        if (distance != 1)
+            throw 'invalid neighbors'
+        return Math.abs(pn.x - pRef.x) + Math.abs(pn.y - pRef.y) * 2
+    }
+
+    getDirectionFromNeighborPerspective(pRef: Point, dir: number): number {
+        return -1 * dir
     }
 }

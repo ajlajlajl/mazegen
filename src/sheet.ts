@@ -7,11 +7,13 @@ export abstract class SheetBase {
     cells: Cell[]
     entry: Point[]
     exit: Point[]
+    isBlockedCB?: CheckCellCB
 
-    protected constructor() {
+    protected constructor(isBlocked?: CheckCellCB) {
         this.cells = []
         this.entry = []
         this.exit = []
+        this.isBlockedCB = isBlocked
     }
 
     abstract index2Point(index: number): Point
@@ -33,11 +35,14 @@ export abstract class SheetBase {
     }
 
     setAllCellState(state: CellStates) {
-        this.cells.forEach(c => c.state = state)
+        this.cells.forEach(c => {
+            if (c.state !== CellStates.blocked)
+                c.state = state
+        })
     }
 
     isAllCellsState(state: CellStates): boolean {
-        return this.cells.some(c => c.state === state)
+        return this.cells.some(c => c.state === CellStates.blocked || c.state === state)
     }
 
     setAllCellData(field: string, value: any) {
@@ -110,7 +115,6 @@ export abstract class SheetBase {
 export class RectangleSheet extends SheetBase {
     w: number
     h: number
-    isBlockedCB?: CheckCellCB
 
     constructor(w: number, h: number, isBlocked?: CheckCellCB) {
         super();

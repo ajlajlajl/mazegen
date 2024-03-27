@@ -7,7 +7,7 @@ export abstract class SheetBase {
     cells: Cell[]
     entry: Point[]
     exit: Point[]
-    isBlockedCB?: CheckCellCB
+    protected isBlockedCB?: CheckCellCB
 
     protected constructor(isBlocked?: CheckCellCB) {
         this.cells = []
@@ -25,6 +25,8 @@ export abstract class SheetBase {
     abstract resetCells(): void
 
     abstract isValidPoint(p: Point): boolean
+
+    abstract isValidCellPoint(p: Point): boolean
 
     abstract movePoint(p: Point, direction: number): Point
 
@@ -53,6 +55,8 @@ export abstract class SheetBase {
         return this.cells.some(c => c.data[field] === value)
     }
 
+    abstract isValidDirValue(dir: number): boolean
+
     abstract isCorridor(cell: Cell): boolean
 
     abstract validate(): boolean
@@ -61,9 +65,11 @@ export abstract class SheetBase {
 
     abstract getDirectionFromNeighborPerspective(pRef: Point, dir: number): number
 
-    linkCellsPD(p: Point, dir: number) {
+    linkCellsPD(p: Point, direction: number) {
+        if (!this.isValidDirValue(direction))
+            throw 'Invalid direction value'
         let c = this.getCell(p)
-        this.linkCellsCD(c, dir)
+        this.linkCellsCD(c, direction)
     }
 
     linkCellsPP(p1: Point, p2: Point) {
@@ -72,10 +78,12 @@ export abstract class SheetBase {
         this.linkCellsCC(c1, c2)
     }
 
-    linkCellsCD(c: Cell, dir: number) {
-        c._addLink(dir)
-        let cn = c.getNeighbor(dir)
-        let ndir = this.getDirectionFromNeighborPerspective(c.point, dir)
+    linkCellsCD(c: Cell, direction: number) {
+        if (!this.isValidDirValue(direction))
+            throw 'Invalid direction value'
+        c._addLink(direction)
+        let cn = c.getNeighbor(direction)
+        let ndir = this.getDirectionFromNeighborPerspective(c.point, direction)
         cn._addLink(ndir)
     }
 
@@ -86,9 +94,11 @@ export abstract class SheetBase {
         c2._addLink(ndir)
     }
 
-    unlinkCellsPD(p: Point, dir: number) {
+    unlinkCellsPD(p: Point, direction: number) {
+        if (!this.isValidDirValue(direction))
+            throw 'Invalid direction value'
         let c = this.getCell(p)
-        this.unlinkCellsCD(c, dir)
+        this.unlinkCellsCD(c, direction)
     }
 
     unlinkCellsPP(p1: Point, p2: Point) {
@@ -97,10 +107,12 @@ export abstract class SheetBase {
         this.unlinkCellsCC(c1, c2)
     }
 
-    unlinkCellsCD(c: Cell, dir: number) {
-        c._removeLink(dir)
-        let cn = c.getNeighbor(dir)
-        let ndir = this.getDirectionFromNeighborPerspective(c.point, dir)
+    unlinkCellsCD(c: Cell, direction: number) {
+        if (!this.isValidDirValue(direction))
+            throw 'Invalid direction value'
+        c._removeLink(direction)
+        let cn = c.getNeighbor(direction)
+        let ndir = this.getDirectionFromNeighborPerspective(c.point, direction)
         cn._removeLink(ndir)
     }
 
@@ -117,7 +129,7 @@ export class RectangleSheet extends SheetBase {
     h: number
 
     constructor(w: number, h: number, isBlocked?: CheckCellCB) {
-        super();
+        super(isBlocked);
         this.w = w
         this.h = h
         this.resetCells()
@@ -131,12 +143,20 @@ export class RectangleSheet extends SheetBase {
         return point.x + point.y * this.w
     }
 
+    isValidDirValue(dir: number): boolean {
+        return this.getAllWalls().includes(dir)
+    }
+
     getAllWalls(): number[] {
         return [-1, 1, -2, 2] //1 for horizontal, 2 for vertical
     }
 
     isValidPoint(p: Point): boolean {
-        return p.x >= 0 && p.y >= 0 && p.x < this.w && p.y < this.h && (this.isBlockedCB === undefined || !this.isBlockedCB(p))
+        return p.x >= 0 && p.y >= 0 && p.x < this.w && p.y < this.h
+    }
+
+    isValidCellPoint(p: Point): boolean {
+        return this.isValidPoint(p) && (this.isBlockedCB === undefined || !this.isBlockedCB(p))
     }
 
     resetCells() {
@@ -146,6 +166,7 @@ export class RectangleSheet extends SheetBase {
                 c.state = CellStates.blocked
             return c
         })
+        return this
     }
 
     isCorridor(cell: Cell): boolean {
@@ -157,6 +178,8 @@ export class RectangleSheet extends SheetBase {
     }
 
     getMovementFromDirection(direction: number): Point {
+        if (!this.isValidDirValue(direction))
+            throw 'Invalid direction value'
         return {
             x: Math.abs(direction) == 1 ? Math.sign(direction) : 0,
             y: Math.abs(direction) == 2 ? Math.sign(direction) : 0,
@@ -164,6 +187,8 @@ export class RectangleSheet extends SheetBase {
     }
 
     movePoint(p: Point, direction: number): Point {
+        if (!this.isValidDirValue(direction))
+            throw 'Invalid direction value'
         let mvp = this.getMovementFromDirection(direction)
         return {x: p.x + mvp.x, y: p.y + mvp.y}
     }
@@ -179,10 +204,12 @@ export class RectangleSheet extends SheetBase {
         let distance = Math.abs(pRef.x - pn.x) + Math.abs(pRef.y - pn.y)
         if (distance != 1)
             throw 'invalid neighbors'
-        return Math.abs(pn.x - pRef.x) + Math.abs(pn.y - pRef.y) * 2
+        return (pn.x - pRef.x) + (pn.y - pRef.y) * 2
     }
 
-    getDirectionFromNeighborPerspective(pRef: Point, dir: number): number {
-        return -1 * dir
+    getDirectionFromNeighborPerspective(pRef: Point, direction: number): number {
+        if (!this.isValidDirValue(direction))
+            throw 'Invalid direction value'
+        return -1 * direction
     }
 }

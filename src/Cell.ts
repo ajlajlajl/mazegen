@@ -42,13 +42,13 @@ export class Cell {
 
     isValidNeighbor(dir: number): boolean {
         let np = this.sheet.movePoint(this.point, dir)
-        return this.sheet.isValidPoint(np)
+        return this.sheet.isValidCellPoint(np)
     }
 
     getNeighbor(dir: number): Cell {
         let np = this.sheet.movePoint(this.point, dir)
         if (!this.sheet.isValidPoint(np))
-            throw 'invalid dir'
+            throw 'invalid point in that dir'
         return this.sheet.getCell(np)
     }
 

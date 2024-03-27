@@ -193,6 +193,13 @@ const config = {
 
   // Whether to use watchman for file crawling
   // watchman: true,
+  transform: {
+    '\\.[jt]sx?$': ['ts-jest', { useESM: true }]
+  },
+  moduleNameMapper: {
+    '(.+)\\.js': '$1'
+  },
+  extensionsToTreatAsEsm: ['.ts']
 };
 
 export default config;

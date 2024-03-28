@@ -1,4 +1,4 @@
-import {SheetBase} from "./sheet.js"
+import {SheetBase} from "./SheetBase.js"
 import {CellStates, Cell, Point} from "./Cell.js"
 
 export function categorize(sheet: SheetBase): number {

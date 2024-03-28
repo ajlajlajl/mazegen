@@ -1,6 +1,6 @@
 import {describe, expect, test} from '@jest/globals'
 
-import {RectangleSheet} from "../src/sheet"
+import {RectangleSheet} from "../src/RectangleSheet"
 import {CellStates, Point} from "../src/Cell"
 
 function isBlocked(p: Point) {

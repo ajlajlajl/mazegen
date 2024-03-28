@@ -1,10 +1,10 @@
 import {describe, expect, test} from '@jest/globals'
 
-import {RNG} from '../src/rng'
+import {Rng} from '../src/Rng'
 
 describe('RNG', () => {
     test('should have a normal distribution', () => {
-        let rng = new RNG();
+        let rng = new Rng();
 
         let runs = 10000
         let counter = new Array(10).fill(0)
@@ -16,7 +16,7 @@ describe('RNG', () => {
         expect(maxdiv).toBeLessThan(100)
     })
     test('in range', () => {
-        let rng = new RNG();
+        let rng = new Rng();
 
         let runs = 10000
         for (let i = 0; i < runs; i++) {

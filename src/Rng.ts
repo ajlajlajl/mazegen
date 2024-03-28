@@ -1,4 +1,4 @@
-export class RNG {
+export class Rng {
     seed = [0, 0, 0, 0]
 
     constructor(seed?: number[]) {

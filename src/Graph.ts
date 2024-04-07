@@ -21,3 +21,20 @@ export function categorize(sheet: SheetBase): number {
     }
     return ctg
 }
+
+export function calcDistance(start: Cell, straightWeight: number, cornerWeight: number) {
+    let sheet = start.sheet
+    sheet.setAllCellData('dist', -1)
+    start.data.dist = 0
+    let Q: { cell: Cell, movingDir: number }[] = [{cell: start, movingDir: NaN}]
+    while (Q.length > 0) {
+        let n = Q.pop() as { cell: Cell, movingDir: number }
+        n.cell.listLinks().forEach(d => {
+            let ch = n.cell.getNeighbor(d)
+            if (ch.data.dist === -1) {
+                ch.data.dist = n.cell.data.dist + (d === n.movingDir ? straightWeight : cornerWeight)
+                Q.push({cell: ch, movingDir: d})
+            }
+        })
+    }
+}

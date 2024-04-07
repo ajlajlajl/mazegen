@@ -21,6 +21,10 @@ export class RectangleSheet extends SheetBase {
         return point.x + point.y * this.w
     }
 
+    getPointRanges(): { [id: string]: { from: number, to: number } } {
+        return {x: {from: 0, to: this.w}, y: {from: 0, to: this.h}}
+    }
+
     isValidDirValue(dir: number): boolean {
         return this.getAllWalls().includes(dir)
     }

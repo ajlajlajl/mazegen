@@ -19,6 +19,8 @@ export abstract class SheetBase {
 
     abstract point2Index(point: Point): number
 
+    abstract getPointRanges(): { [id: string]: { from: number, to: number } }
+
     abstract getAllWalls(): number[]
 
     abstract resetCells(): void
